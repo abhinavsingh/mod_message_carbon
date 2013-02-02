@@ -1,0 +1,1 @@
+{'src/mod_message_carbon', [debug_info, {outdir, "ebin"}, {i, "/lib/ejabberd/include"}]}.
