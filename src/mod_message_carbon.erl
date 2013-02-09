@@ -17,7 +17,7 @@
 -type value()	:: string().
 -type opts()	:: [{name(), value()}, ...].
 
--define(NS_CARBON, "urn:xmpp:carbons:1").
+-define(NS_CARBON, "urn:xmpp:carbons:2").
 -define(NS_FORWARD, "urn:xmpp:forward:0").
 
 -record(carbon, 
@@ -94,9 +94,9 @@ carbon(Jid, Pkt, Tag) ->
 		if
 			Res =/= Jid#jid.lresource ->
 				Pid = ejabberd_sm:get_session_pid(Jid#jid.luser, Jid#jid.lserver, Res),
-				Cbn = {xmlelement, Tag, [{"xmlns", ?NS_CARBON}], []},
 				Fwd = {xmlelement, "forwarded", [{"xmlns", ?NS_FORWARD}], [Pkt]},
-				Childs = [Cbn, Fwd],
+				Cbn = {xmlelement, Tag, [{"xmlns", ?NS_CARBON}], [Fwd]},
+				Childs = [Cbn],
 				Attrs = [{"from", jlib:jid_to_string(Bare)}, {"to", jlib:jid_to_string(Full)}, {"type", "chat"}],
 				Pkt1 = {xmlelement, "message", Attrs, Childs},
 				Pid ! {route, Bare, Full, Pkt1};
