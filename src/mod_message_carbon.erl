@@ -63,7 +63,9 @@ process_carbon_iq(From, _To, #iq{type = set, sub_el = {xmlelement, "enable", _, 
 	IQ#iq{type = result, sub_el = []};
 process_carbon_iq(From, _To, #iq{type = set, sub_el = {xmlelement, "disable", _, _}} = IQ) ->
 	ok = mnesia:dirty_delete_object(#carbon{jid = {From#jid.luser, From#jid.lserver}, res = From#jid.lresource}),
-	IQ#iq{type = result, sub_el = []}.
+	IQ#iq{type = result, sub_el = []};
+process_carbon_iq(_From, _To, IQ) ->
+        IQ.
 
 filter_packet({From, To, {xmlelement, "message", _, _} = Pkt}) ->
 	case xml:get_tag_attr_s("type", Pkt) of
