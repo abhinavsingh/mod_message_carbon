@@ -67,20 +67,23 @@ process_carbon_iq(From, _To, #iq{type = set, sub_el = {xmlelement, "disable", _,
 process_carbon_iq(_From, _To, IQ) ->
         IQ.
 
-filter_packet({From, To, {xmlelement, "message", _, _} = Pkt}) ->
+filter_packet({From, To, {xmlelement, "message", Attrs, Children} = Pkt}) ->
 	case xml:get_tag_attr_s("type", Pkt) of
 		"chat" ->
+                        Attrs1 = lists:keystore("from", 1, Attrs, {"from", jlib:jid_to_string(From)}),
+                        Attrs2 = lists:keystore("to", 1, Attrs1, {"to", jlib:jid_to_string(To)}),
+                        Pkt1 = {xmlelement, "message", Attrs2, Children},
 			%% Receiver case where all resources of To user must receive incoming chat message
 			if
 				%% Carbon only when To is a full jid and not bare jid
 				To#jid.resource =/= [] ->
-					carbon(To, Pkt, "received");
+					carbon(To, Pkt1, "received");
 				true ->
 					ok
 			end,
 			
 			%% Sender case where all resources of From user must receive it's own chat message
-			carbon(From, Pkt, "sent"),
+			carbon(From, Pkt1, "sent"),
 			{From, To, Pkt};
 		_ ->
 			{From, To, Pkt}
